@@ -1,0 +1,11 @@
+pandas
+numpy
+streamlit
+plotly
+matplotlib
+seaborn
+lifetimes
+nbformat
+DateTime
+pyxlsb
+XlsxWriter
