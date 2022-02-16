@@ -9,3 +9,4 @@ nbformat
 DateTime
 pyxlsb
 XlsxWriter
+openpyxl
