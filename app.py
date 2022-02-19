@@ -6,13 +6,13 @@ conda install -c plotly plotly
 conda install -c conda-forge matplotlib
 conda install -c conda-forge lifetimes 
 conda install -c conda-forge nbformat
-pip install openpyxl
 pip install streamlit
 pip install DateTime
 
 # excel
 conda install -c conda-forge pyxlsb
 pip install XlsxWriter
+Pip install openpyxl
 
 base_38_rfm
 
@@ -30,7 +30,7 @@ from PIL import  Image
 
 # IMPORTAR LAS PAGINAS
 from multipage import MultiPage
-from pages import data_upload, pagina_01, pagina_02, pagina_03
+from pages import data_upload, pagina_01, pagina_02
 
 # CREAR LA INSTANCIA APP
 app = MultiPage()
@@ -41,13 +41,13 @@ display = Image.open('logo_farmacorp.jpeg')
 # 2 COLUMNAS
 col1, col2 = st.columns(2)
 col1.image(display, width = 70)
-col2.title("SEGMENTACION RFM")
+col1.write('by Arzafity')
+col2.header("SEGMENTACION RFM")
 
 # CARGAR LAS PAGINAS
-app.add_page("Cargar Datos", data_upload.app)
-app.add_page("OUTLIERS de los Datos", pagina_01.app)
-app.add_page("Ejecutar Modelo + Campos adicionales", pagina_02.app)
-app.add_page("Graficos Segmentacion RFM", pagina_03.app)
+app.add_page("Carga de Datos", data_upload.app)
+app.add_page("Run RFM + OUTLIERS", pagina_01.app)
+app.add_page("EDA", pagina_02.app)
 
 
 # EJECUTAR
