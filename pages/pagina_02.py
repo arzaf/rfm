@@ -1,9 +1,17 @@
 # LIBRERIAS
+from re import A
+from tkinter import HORIZONTAL
 import streamlit as st
 import numpy as np
 import pandas as pd
 import os
+import base64
+import io
 
+from lifetimes.utils import summary_data_from_transaction_data
+from datetime import timedelta
+import datetime
+import seaborn as sns
 import matplotlib.pyplot as plt
 #%matplotlib inline
 import plotly.offline as pyoff
@@ -12,164 +20,153 @@ import plotly.express as px
 
 
 
-
-# OUTLIER CAPPING AL UMBRAL ALTO
-def outlier_umbral_alto(columna,umbral_alto=0.75):
-    Q3 = np.quantile(columna, umbral_alto) # defaul 0.75
-    Q1 = np.quantile(columna, 0.25) # default 0.25
-    IQR = Q3 - Q1
-    st.write('IQR: ',IQR)
-    upper_limit = Q3 + 1.5 * IQR
-    st.write('Limite Superior: ',upper_limit)
-    return upper_limit
+import pandas as pd
+from io import BytesIO
+from pyxlsb import open_workbook as open_xlsb
+from xlsxwriter import Workbook
+import streamlit as st
 
 
 
 
-
+def to_excel(df):
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    format1 = workbook.add_format({'num_format': '0.00'}) 
+    worksheet.set_column('A:A', None, format1)  
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
 
 
 # DETALLE DE LA PAGINA
 def app():
-    if 'rfm.csv' not in os.listdir('data'):
-        st.markdown("Primero cargar el archivo luego ejecutar OUTLIER")
+    if 'rfm3.csv' not in os.listdir('data'):
+        st.markdown("Primero ejecutar los 2 pasos anteriores del menu...")
     else:
-        # Parametros
-        st.subheader('Parametros')
-        umbral_maximo = st.number_input('Umbral Maximo:', min_value=70, max_value=100, value=85, step=1)/100
-        st.write('Umbral para los Outliers: ',umbral_maximo*100)
-        # Cargar data
-        st.markdown("Cargando archivo RFM")
-        rfm = pd.read_csv('data/rfm.csv')
-        st.write(rfm)
-        # RUN EJECUTAR SEGMENTACION
-        formulario = st.form(key='mi-formulario')
-        boton_run_segmentacion = formulario.form_submit_button('EJECUTAR SEGMENTACION')
-        if boton_run_segmentacion:
-                    st.markdown("EJECUTAR SEGMENTACION")
-                    # Creando los Quartiles
-                    quantiles = rfm[['Recency', 'Frequency', 'Monetary']].quantile([.2, .4, .6, .8]).to_dict()
-                    print(quantiles)
-                    # Definir formulas
-                    def r_score(x):
-                        if x <= quantiles['Recency'][.2]:
-                            return 5
-                        elif x <= quantiles['Recency'][.4]:
-                            return 4
-                        elif x <= quantiles['Recency'][.6]:
-                            return 3
-                        elif x <= quantiles['Recency'][.8]:
-                            return 2
-                        else:
-                            return 1
+        st.header("ANALISIS EXPLORATORIO DE DATOS (EDA)")
+        # DESCARGAR ARCHIVO EN EXCEL ::::::::::::::::::::::::::::::::::::::::::::::::::
+        st.subheader('Resultado de la Segmentacion RFM')
+        # Cargar datos
+        rfm3 = pd.read_csv('data/rfm3.csv')
+        st.write(rfm3)
+        #####
+        df = rfm3['Segment'].str.strip().value_counts()
+        st.table(df)
+        st.write('Total clientes: ' + str('{:,}'.format(len(rfm3))))
+        
+        ####
+        df_xlsx = to_excel(rfm3)
+        st.download_button(label='📥 Descargar Segmentacion RFM',
+                        data=df_xlsx ,
+                        file_name= 'SegmentacionRFM.xlsx')
+        #######################################################################
+        st.markdown("""---""")
+        if st.button("Generar Analisis (Graficos"):
+            # cargar datos
+            rfm3 = pd.read_csv('data/rfm3.csv')
+            # GRAFICOS EDA ::::::::::::::::::::::::::::::::::::::::::::::::::
+            df = rfm3['Segment'].str.strip().value_counts()
+            st.table(df)
+            
+            st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
+            segments_counts = rfm3['Segment'].value_counts().sort_values(ascending=True)
+            fig, ax = plt.subplots()
+            bars = ax.barh(range(len(segments_counts)),
+                        segments_counts,
+                        color='#50B2C0')
+            ax.set_frame_on(False)
+            ax.tick_params(left=False,
+                        bottom=False,
+                        labelbottom=False)
+            ax.set_yticks(range(len(segments_counts)))
+            ax.set_yticklabels(segments_counts.index)
+            for i, bar in enumerate(bars):
+                    value = bar.get_width()
+                    if segments_counts.index[i] in ['Campeones', 'Leales','Potencialmente Leales']:
+                        bar.set_color('red')
+                    ax.text(value,
+                            bar.get_y() + bar.get_height()/2,
+                            '{:,} ({:}%)'.format(int(value),
+                                            int(value*100/segments_counts.sum())),
+                            va='center',
+                            ha='left'
+                        )
+            st.plotly_chart(fig)
 
-                    def fm_score(x, c):
-                        if x <= quantiles[c][.2]:
-                            return 1
-                        elif x <= quantiles[c][.4]:
-                            return 2
-                        elif x <= quantiles[c][.6]:
-                            return 3
-                        elif x <= quantiles[c][.8]:
-                            return 4
-                        else:
-                            return 5  
-                    # Asignar Segmentacion
-                    rfm['R'] = rfm['Recency'].apply(lambda x: r_score(x))
-                    rfm['F'] = rfm['Frequency'].apply(lambda x: fm_score(x, 'Frequency'))
-                    rfm['M'] = rfm['Monetary'].apply(lambda x: fm_score(x, 'Monetary'))
-                    # Asignar Score
-                    rfm['RFM Score'] = rfm['R'].map(str) + rfm['F'].map(str) + rfm['M'].map(str)
-                    # Asignando etiquetas
-                    segt_map = {
-                        r'[1-2][1-2]': 'Hibernando', # Hibernating
-                        r'[1-2][3-4]': 'En Riesgo', # At Risk
-                        r'[1-2]5': 'No puedo Perderlos', # Can\'t Loose
-                        r'3[1-2]': 'A Punto de Dormir', # About to Sleep
-                        r'33': 'Necesitan Atencion', # Need Attention
-                        r'[3-4][4-5]': 'Leales', # Loyal CLIENTE_NOMBREs
-                        r'41': 'Prometedores', # Promising
-                        r'51': 'Nuevos', # New CLIENTE_NOMBREs
-                        r'[4-5][2-3]': 'Potencialmente Leales', # Potential Loyalists
-                        r'5[4-5]': 'Campeones' # Champions
-                    }
-                    rfm['Segment'] = rfm['R'].map(str) + rfm['F'].map(str)
-                    rfm['Segment'] = rfm['Segment'].replace(segt_map, regex=True)
-                    # Calculando RFM_Score
-                    rfm['TotalRFM'] = rfm[['R','F','M']].sum(axis=1)
-                    # Creando los SCORES
-                    rfm['Score'] = 'Bronce'
-                    rfm.loc[rfm['TotalRFM']>6,'Score'] = 'Plata' 
-                    rfm.loc[rfm['TotalRFM']>9,'Score'] = 'Oro' 
-                    rfm.loc[rfm['TotalRFM']>12,'Score'] = 'Platino'
-                    st.write(rfm)
-                    # Guardar RFM con los Segmentos
-                    rfm.to_csv('data/rfm.csv', index=False)
-                    st.write('Guardando archivo RFM con los Segmentos')
-                    
 
-                    
-                    
-        # AGREGAR CAMPOS ADICIONALES
-        formulario2 = st.form(key='mi-formulario2')
-        boton_run_agregar = formulario2.form_submit_button('AGREGAR TICKET PROMEDIO, SKU, UNIDADES')
-        if boton_run_agregar:
-            st.write(':::::::::: Agregando campos adicionales del cliente   ::::::::::')
-            # Cargando data
-            data = pd.read_csv('data/data.csv')
-            data = data.convert_dtypes()
-            data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
-            clientes = data.groupby(['CLIENTE_CODIGO', 'CLIENTE_NOMBRE']).sum().reset_index()
-            # Consolidar con nombre de cliente
-            # Cargar datos RFM con segmentacion
-            rfm = pd.read_csv('data/rfm.csv')
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
+            df = rfm3
+            line_colors = ["#7CEA9C", '#50B2C0', "rgb(114, 78, 145)", "hsv(348, 66%, 90%)", "hsl(45, 93%, 58%)"]
+            fig = px.pie(df, values='id', names='Segment',
+                        title='',
+                        hover_data=['Monetary'],color_discrete_sequence=line_colors)
+            fig.update_traces(textposition='inside', textinfo='percent+label')
+            st.plotly_chart(fig)
             
-            rfm2 = rfm.merge(clientes, on='CLIENTE_CODIGO', how='inner')
-            # Agregar contador de clientes ID
-            rfm2['id'] = 1
-            # Agregar TICKET PROMEDIO
-            rfm2['Ticket'] = round(rfm2['MONTO']/rfm2['Frequency'],0)
-            st.write(rfm2)
-            # Guardar
-            rfm2.to_csv('data/rfm2.csv', index=False)
-            st.write('Guardando archivo RFM con campos adicionales')
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('DISTRIBUICION X FRECUENCY')
+            fig = px.bar(rfm3, y='Frequency', x='Segment', text_auto='.2s',
+                        title="Segmentos x FRECUENCY",
+                        hover_name="CLIENTE_NOMBRE",template='none',color_discrete_sequence=["hsv(348, 66%, 90%)"]) # templates: ggplot2, none
+            st.plotly_chart(fig)
             
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('DISTRIBUICION X RECENCY')
+            fig = px.bar(rfm3, y='Recency', x='Segment', text_auto='.2s',
+                        title="Segmentos x RECENCY",
+                        hover_name="CLIENTE_NOMBRE",template='none',color_discrete_sequence=["hsl(45, 93%, 58%)"]) # templates: ggplot2, none
+            st.plotly_chart(fig)
             
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('DISTRIBUICION X MONETARY')
+            fig = px.bar(rfm3, y='Monetary', x='Segment', text_auto='.2s',
+                        title="Segmentos x MONETARY",
+                        hover_name="CLIENTE_NOMBRE",template='none',color_discrete_sequence=["#7CEA9C"]) # templates: ggplot2, none
+            st.plotly_chart(fig)
             
-        # OUTLIER 
-        st.write(':::  OUTLIERS  DE CAMPOS RECIEN AGREGADOS :::')
-        formulario3 = st.form(key='mi-formulario3')
-        boton_run_outliers = formulario3.form_submit_button('EJECUTAR OUTLIERS PARA TICKET PROMEDIO, SKU, UNIDADES')
-        if boton_run_outliers:
-            # Cargar data
-            rfm2 = pd.read_csv('data/rfm2.csv')
-            columnas = ['UNIDADES','Ticket','SKU']
-            for columna in columnas:
-                st.write(':::::::::: VARIABLE ::::::::::',columna)
-                st.write('::::::::::  Estadisticas   ::::::::::')
-                st.write(rfm2[[columna]].describe())
-                st.write('::::::::::  Rango Intercuartilago   ::::::::::')
-                st.write('Umbral Alto %: ',umbral_maximo)
-                limite_superior = outlier_umbral_alto(rfm2[columna],umbral_maximo)
-                st.write('::::::::::  Ajustando Outliers por encima del Limite Superior   ::::::::::')
-                rfm2[columna] = np.where(rfm2[columna] > limite_superior, limite_superior, rfm2[columna])
-                st.write(rfm2[columna].describe())
-                st.write('::::::::::  Grafico Histograma sin Outliers   ::::::::::')
-                df = rfm2
-                fig = px.histogram(df, x=columna,
-                                title='Histograma ' + columna,
-                                labels={columna:columna}, # can specify one label per df column
-                                opacity=0.8,
-                                log_y=False, # represent bars with log scale
-                                color_discrete_sequence=['indianred'] # color of histogram bars
-                                )
-                fig.show()
-                
-                st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
-                df = rfm2
-                fig = px.box(df, y=columna,title='BoxPlot ' + columna)
-                fig.show()
-                # Cargar data
-                rfm2.to_csv('data/rfm3.csv', index=False)
-                st.write('Guardando archivo RFM con campos adicionales sin Outliers')
-
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('SEGMENTACION RFM')
+            fig = px.scatter(rfm3, x="Recency", y="Frequency",
+                        size="Monetary", color="Segment",
+                            hover_name="CLIENTE_NOMBRE", log_x=False, size_max=60,template='ggplot2') # templates: ggplot2, none
+            st.plotly_chart(fig)
+            
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('UNIDADES vs TICKET PROMEDIO')
+            fig = px.scatter(rfm3, x="UNIDADES", y="Ticket",
+                        size="Monetary", color="Segment",
+                            hover_name="CLIENTE_NOMBRE", log_x=False, size_max=60,template='ggplot2') # templates: ggplot2, none
+            st.plotly_chart(fig)
+            
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('SKU vs TICKET PROMEDIO')
+            fig = px.scatter(rfm3, x="SKU", y="Ticket",
+                        size="Monetary", color="Segment",
+                            hover_name="CLIENTE_NOMBRE", log_x=False, size_max=60,template='ggplot2') # templates: ggplot2, none
+            st.plotly_chart(fig)
+            
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('UNIDADES vs SKU')
+            fig = px.scatter(rfm3, x="UNIDADES", y="SKU",
+                        size="Monetary", color="Segment",
+                            hover_name="CLIENTE_NOMBRE", log_x=False, size_max=60,template='ggplot2') # templates: ggplot2, none
+            st.plotly_chart(fig)
+            
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('SEGMENTACION RFM X SCORE')
+            df = rfm3
+            line_colors = ["#7CEA9C", '#50B2C0', "rgb(114, 78, 145)", "hsv(348, 66%, 90%)", "hsl(45, 93%, 58%)"]
+            fig = px.treemap(df, path=[px.Constant('Segment'), 'Segment','Score'], values='Monetary',
+                            hover_data=['Monetary'],color_discrete_sequence=line_colors)
+            st.plotly_chart(fig)
+        
+            # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.subheader('SEGMENTACION RFM X SCORE')
+            df = rfm3
+            fig = px.sunburst(df, path=['Segment','Score'], values='Monetary')
+            st.plotly_chart(fig)
