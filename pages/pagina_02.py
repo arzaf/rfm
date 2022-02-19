@@ -53,12 +53,6 @@ def app():
         # Cargar datos
         rfm3 = pd.read_csv('data/rfm3.csv')
         st.write(rfm3)
-        #####
-        df = rfm3['Segment'].str.strip().value_counts()
-        st.table(df)
-        st.write('Total clientes: ' + str('{:,}'.format(len(rfm3))))
-        
-        ####
         df_xlsx = to_excel(rfm3)
         st.download_button(label='📥 Descargar Segmentacion RFM',
                         data=df_xlsx ,
@@ -69,9 +63,13 @@ def app():
             # cargar datos
             rfm3 = pd.read_csv('data/rfm3.csv')
             # GRAFICOS EDA ::::::::::::::::::::::::::::::::::::::::::::::::::
+            # df con total clientes x segmentos
+            st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
             df = rfm3['Segment'].str.strip().value_counts()
             st.table(df)
-            
+            st.write('Total clientes: ' + str('{:,}'.format(len(rfm3))))
+
+            '''
             st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
             segments_counts = rfm3['Segment'].value_counts().sort_values(ascending=True)
             fig, ax = plt.subplots()
@@ -96,10 +94,11 @@ def app():
                             ha='left'
                         )
             st.plotly_chart(fig)
-
+            '''
 
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-            st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
+            #st.markdown("""---""")
+            #st.subheader('TOTAL CLIENTES X SEGMENTACION RFM')
             df = rfm3
             line_colors = ["#7CEA9C", '#50B2C0', "rgb(114, 78, 145)", "hsv(348, 66%, 90%)", "hsl(45, 93%, 58%)"]
             fig = px.pie(df, values='id', names='Segment',
@@ -109,6 +108,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('DISTRIBUICION X FRECUENCY')
             fig = px.bar(rfm3, y='Frequency', x='Segment', text_auto='.2s',
                         title="Segmentos x FRECUENCY",
@@ -116,6 +116,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('DISTRIBUICION X RECENCY')
             fig = px.bar(rfm3, y='Recency', x='Segment', text_auto='.2s',
                         title="Segmentos x RECENCY",
@@ -123,6 +124,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('DISTRIBUICION X MONETARY')
             fig = px.bar(rfm3, y='Monetary', x='Segment', text_auto='.2s',
                         title="Segmentos x MONETARY",
@@ -130,6 +132,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('SEGMENTACION RFM')
             fig = px.scatter(rfm3, x="Recency", y="Frequency",
                         size="Monetary", color="Segment",
@@ -137,6 +140,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('UNIDADES vs TICKET PROMEDIO')
             fig = px.scatter(rfm3, x="UNIDADES", y="Ticket",
                         size="Monetary", color="Segment",
@@ -144,6 +148,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('SKU vs TICKET PROMEDIO')
             fig = px.scatter(rfm3, x="SKU", y="Ticket",
                         size="Monetary", color="Segment",
@@ -151,6 +156,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('UNIDADES vs SKU')
             fig = px.scatter(rfm3, x="UNIDADES", y="SKU",
                         size="Monetary", color="Segment",
@@ -158,6 +164,7 @@ def app():
             st.plotly_chart(fig)
             
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('SEGMENTACION RFM X SCORE')
             df = rfm3
             line_colors = ["#7CEA9C", '#50B2C0', "rgb(114, 78, 145)", "hsv(348, 66%, 90%)", "hsl(45, 93%, 58%)"]
@@ -166,6 +173,7 @@ def app():
             st.plotly_chart(fig)
         
             # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+            st.markdown("""---""")
             st.subheader('SEGMENTACION RFM X SCORE')
             df = rfm3
             fig = px.sunburst(df, path=['Segment','Score'], values='Monetary')
