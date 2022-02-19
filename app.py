@@ -13,7 +13,6 @@ pip install DateTime
 conda install -c conda-forge pyxlsb
 pip install XlsxWriter
 pip install openpyxl
-pip install tkinter
 
 base_38_rfm
 
