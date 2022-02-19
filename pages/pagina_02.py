@@ -1,6 +1,6 @@
 # LIBRERIAS
 from re import A
-from tkinter import HORIZONTAL
+#from tkinter import HORIZONTAL
 import streamlit as st
 import numpy as np
 import pandas as pd
