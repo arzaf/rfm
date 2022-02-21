@@ -1,4 +1,5 @@
 # LIBRERIAS
+from pickle import FALSE
 from re import A
 #from tkinter import HORIZONTAL
 import streamlit as st
@@ -28,7 +29,6 @@ import streamlit as st
 
 
 
-
 def to_excel(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -52,12 +52,40 @@ def app():
         st.subheader('Resultado de la Segmentacion RFM')
         # Cargar datos
         rfm3 = pd.read_csv('data/rfm3.csv')
-        st.write(rfm3)
+        #st.write(rfm3)
         df_xlsx = to_excel(rfm3)
         st.download_button(label='📥 Descargar Segmentacion RFM',
                         data=df_xlsx ,
                         file_name= 'SegmentacionRFM.xlsx')
         #######################################################################
+        st.markdown("""---""")
+        # TOP CLIENTES
+        st.header('TOP CLIENTES')
+        top = rfm3[['CLIENTE_NOMBRE','Segment','RFM Score','Score','MONTO']].sort_values('MONTO', ascending=False)
+        st.write(top)
+        st.markdown('')
+        st.markdown('')
+        st.markdown("""---""")
+        # Lista de Segmento
+        try:
+            lista = ['Campeones','Potencialmente Leales','Leales','No puedo Perderlos','Nuevos','Prometedores']
+            t_segmento = st.selectbox('Segmento?',lista)
+            st.write('Segmento seleccionado: ',t_segmento)
+
+        except:
+            st.error("Seleccionar el Segmento...")
+            st.stop()
+
+        # Filtro
+        st.header('TOP CLIENTES x SEGMENTO')
+        filtro = top['Segment'] == t_segmento
+        topfiltro  = top[filtro]
+        st.write(topfiltro)
+
+        
+        
+        
+        
         st.markdown("""---""")
         if st.button("Generar Analisis (Graficos"):
             # cargar datos

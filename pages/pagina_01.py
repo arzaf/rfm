@@ -64,7 +64,7 @@ def app():
         
         # INCIAR EL MODELO ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         if st.button("Calcular el Modelo RFM y limpiar Outliers"):
-            st.subheader('Iniciando el Modelo RFM...')
+            st.subheader('Inciando el Modelo RFM...')
             aggr = {
                 'DaysSinceOrder': lambda x: x.min(),  # the number of days since last order (Recency)
                 'FECHA': lambda x: len([d for d in x if d >= NOW - timedelta(days=period)]), # the total number of orders in the last period (Frequency)
