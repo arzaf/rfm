@@ -68,8 +68,9 @@ def app():
         st.markdown("""---""")
         # Lista de Segmento
         try:
-            lista = ['Campeones','Potencialmente Leales','Leales','No puedo Perderlos','Nuevos','Prometedores',
-                    'Necesitan Atencion','En Riesgo','No puedo Perderlos','Hibernando']
+            lista = ['Campeones','Leales','Potencialmente Leales',
+                     'No puedo Perderlos','Nuevos','Prometedores',
+                     'Necesitan Atencion','En Riesgo','No puedo Perderlos','Hibernando']
             t_segmento = st.selectbox('Segmento?',lista)
             st.write('Segmento seleccionado: ',t_segmento)
 
