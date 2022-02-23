@@ -12,7 +12,7 @@ pip install DateTime
 # excel
 conda install -c conda-forge pyxlsb
 pip install XlsxWriter
-pip install openpyxl
+Pip install openpyxl
 
 base_38_rfm
 
@@ -47,7 +47,7 @@ col2.header("SEGMENTACION RFM")
 # CARGAR LAS PAGINAS
 app.add_page("Carga de Datos", data_upload.app)
 app.add_page("Run RFM + OUTLIERS", pagina_01.app)
-app.add_page("EDA", pagina_02.app)
+app.add_page("Informe EDA", pagina_02.app)
 
 
 # EJECUTAR
