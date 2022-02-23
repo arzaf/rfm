@@ -87,11 +87,14 @@ def app():
                 st.subheader('VARIABLE: ' + columna)
                 st.write('::::::::::  Estadisticas   ::::::::::')
                 st.write(rfm[[columna]].describe())
-                # GRAFICO ::::::::::::::
-                st.write('::::::::::  Grafico BoxPlot  ::::::::::')
-                df = rfm
-                fig = px.box(df, y=columna,title='BoxPlot ' + columna)
-                st.plotly_chart(fig)
+                #
+                if graficar == 'Si':
+                    # GRAFICO ::::::::::::::
+                    st.write('::::::::::  Grafico BoxPlot  ::::::::::')
+                    df = rfm
+                    fig = px.box(df, y=columna,title='BoxPlot ' + columna)
+                    st.plotly_chart(fig)
+                
                 st.write('::::::::::  OUTLIER   ::::::::::')
                 st.write('Umbral Alto: ','{:.0%}'.format(umbral_maximo))
                 limite_superior = outlier_umbral_alto(rfm[columna],umbral_maximo)
@@ -211,10 +214,11 @@ def app():
                 st.write('::::::::::  Estadisticas   ::::::::::')
                 st.write(rfm2[[columna]].describe())
                 # GRAFICAR ::::::::::::::::::::::::::
-                st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
-                df = rfm2
-                fig = px.box(df, y=columna,title='BoxPlot ' + columna)
-                st.plotly_chart(fig)
+                if graficar == 'Si':
+                    st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
+                    df = rfm2
+                    fig = px.box(df, y=columna,title='BoxPlot ' + columna)
+                    st.plotly_chart(fig)
                 st.write('::::::::::  OUTLIER   ::::::::::')
                 st.write('Umbral Alto %: ','{:.0%}'.format(umbral_maximo))
                 limite_superior = outlier_umbral_alto(rfm2[columna],umbral_maximo)
