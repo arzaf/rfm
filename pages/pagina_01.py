@@ -30,7 +30,7 @@ def outlier_umbral_alto(columna,umbral_alto=0.75):
     Q3 = np.quantile(columna, umbral_alto) # defaul 0.75
     Q1 = np.quantile(columna, 0.25) # default 0.25
     IQR = Q3 - Q1
-    st.write('IQR: ','{:.0f}'.format(IQR))
+    #st.write('IQR: ','{:.0f}'.format(IQR))
     upper_limit = Q3 + 1.5 * IQR
     st.write('Limite Superior: ','{:.0f}'.format(upper_limit))
     return upper_limit
@@ -47,7 +47,7 @@ def app():
         # Formatear el df
         data = data.convert_dtypes()
         data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
-        st.header("OUTLIERS")
+        st.header("EJECUTAR RFM + OUTLIERS")
         # PARAMETROS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         st.header('P A R A M E T R O S')
         umbral_maximo = st.number_input('% Umbral Maximo:', min_value=70, max_value=100, value=85, step=1)/100
@@ -87,7 +87,12 @@ def app():
                 st.subheader('VARIABLE: ' + columna)
                 st.write('::::::::::  Estadisticas   ::::::::::')
                 st.write(rfm[[columna]].describe())
-                st.write('::::::::::  Rango Intercuartilago   ::::::::::')
+                # GRAFICO ::::::::::::::
+                st.write('::::::::::  Grafico BoxPlot  ::::::::::')
+                df = rfm
+                fig = px.box(df, y=columna,title='BoxPlot ' + columna)
+                st.plotly_chart(fig)
+                st.write('::::::::::  OUTLIER   ::::::::::')
                 st.write('Umbral Alto: ','{:.0%}'.format(umbral_maximo))
                 limite_superior = outlier_umbral_alto(rfm[columna],umbral_maximo)
                 st.write('::::::::::  Ajustando Outliers por encima del Limite Superior   ::::::::::')
@@ -105,11 +110,7 @@ def app():
                                     color_discrete_sequence=['indianred'] # color of histogram bars
                                     )
                     st.plotly_chart(fig)
-                    # GRAFICO ::::::::::::::
-                    st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
-                    df = rfm
-                    fig = px.box(df, y=columna,title='BoxPlot ' + columna)
-                    st.plotly_chart(fig)
+
                 # Guardar
                 rfm.to_csv('data/rfm.csv', index=False)
                 st.write('Guardando archivo RFM sin Outliers')
@@ -209,7 +210,12 @@ def app():
                 st.subheader('VARIABLE: ' + columna)
                 st.write('::::::::::  Estadisticas   ::::::::::')
                 st.write(rfm2[[columna]].describe())
-                st.write('::::::::::  Rango Intercuartilago   ::::::::::')
+                # GRAFICAR ::::::::::::::::::::::::::
+                st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
+                df = rfm2
+                fig = px.box(df, y=columna,title='BoxPlot ' + columna)
+                st.plotly_chart(fig)
+                st.write('::::::::::  OUTLIER   ::::::::::')
                 st.write('Umbral Alto %: ','{:.0%}'.format(umbral_maximo))
                 limite_superior = outlier_umbral_alto(rfm2[columna],umbral_maximo)
                 st.write('::::::::::  Ajustando Outliers por encima del Limite Superior   ::::::::::')
@@ -227,11 +233,7 @@ def app():
                                     color_discrete_sequence=['indianred'] # color of histogram bars
                                     )
                     st.plotly_chart(fig)
-                    # GRAFICAR ::::::::::::::::::::::::::
-                    st.write('::::::::::  Grafico BoxPlot sin Outliers   ::::::::::')
-                    df = rfm2
-                    fig = px.box(df, y=columna,title='BoxPlot ' + columna)
-                    st.plotly_chart(fig)
+
                 # Cargar data
                 rfm2.to_csv('data/rfm3.csv', index=False)
                 st.write('Guardando archivo RFM con campos adicionales sin Outliers')
