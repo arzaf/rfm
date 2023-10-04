@@ -46,7 +46,8 @@ def app():
         data = pd.read_csv('data/data.csv')
         # Formatear el df
         data = data.convert_dtypes()
-        data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
+        #data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
+        data['FECHA'] = pd.to_datetime(data['FECHA'], errors='coerce', format='%Y-%d-%m')
         st.header("EJECUTAR RFM + OUTLIERS")
         # PARAMETROS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         st.header('P A R A M E T R O S')
