@@ -1,4 +1,3 @@
-# LIBRERIAS
 '''
 conda install pandas
 conda install -c anaconda seaborn
@@ -14,7 +13,7 @@ conda install -c conda-forge pyxlsb
 pip install XlsxWriter
 Pip install openpyxl
 
-base_38_rfm
+
 
 https://guillaume-martin.github.io/rfm-segmentation-with-python.html
 https://medium.com/@nurlan.imanov/CLIENTE_NOMBRE-segmentation-using-rfm-analysis-d2df1dfa2f9f
@@ -23,6 +22,7 @@ https://clevertap.com/blog/rfm-analysis/
 https://plotly.com/python/sunburst-charts/
 
 '''
+#LIBRERIAS
 import os
 import streamlit as st
 import numpy as np
