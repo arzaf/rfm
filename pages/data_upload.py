@@ -14,6 +14,7 @@ def app():
     st.header("CARGA DE DATO")
     st.subheader("Agregar archivo Excel con la base de datos") 
     st.write("\n")
+    st.info("Los campos deben ser: FECHA, FACTURA, CLIENTE_CODIGO, CLIENTE_NOMBRE, SUCURSAL,SKU, UNIDADES, MONTO")
 
     # BOTON PARA SELECCIONAR EL ARCHIVO
     archivo = st.file_uploader("Seleccione el archivo", type = ['csv', 'xlsx'])
@@ -34,9 +35,10 @@ def app():
             st.header('C L E A N   D A T A')
             data = data.convert_dtypes()
             data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
-            st.write('Eliminado CLIENTE_CODIGO= -1, -2')
+            st.write('Eliminado CLIENTE_CODIGO= -1, -2, 5746')
             data = data[data['CLIENTE_CODIGO']!=-1]
             data = data[data['CLIENTE_CODIGO']!=-2]
+            data = data[data['CLIENTE_CODIGO']!=5746]
             st.write('Eliminado CLIENTE_CODIGO nulos')
             data = data[data['CLIENTE_CODIGO'].notna()]
             st.write('Eliminado SKU nulos')
@@ -49,7 +51,7 @@ def app():
             # Mostrar
             st.write(data)
             #Guardar
-            st.write('Guardando Data limpiada')
+            st.write('Data limpiada guardada')
         except:
             st.error("Debes cargar el archivo, click en el boton 'browser files' y seleccionar el excel a cargar...")
             st.stop()

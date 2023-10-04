@@ -192,7 +192,9 @@ def app():
             data = data.convert_dtypes()
             data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
             '''
-            clientes = data.groupby(['CLIENTE_CODIGO', 'CLIENTE_NOMBRE']).sum().reset_index()
+            #st.write(data)
+            #st.write(rfm)
+            clientes = data.groupby(['CLIENTE_CODIGO', 'CLIENTE_NOMBRE']).count().reset_index()
             # Crear rfm2 con campos adicionales del cliente
             rfm2 = rfm.merge(clientes, on='CLIENTE_CODIGO', how='inner')
             # Agregar contador de clientes ID
