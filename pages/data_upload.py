@@ -10,11 +10,36 @@ import base64
 import io
 import os
 
+from io import BytesIO
+from pyxlsb import open_workbook as open_xlsb
+from xlsxwriter import Workbook
+from openpyxl.workbook import Workbook
+
+def to_excel(df):
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='openpyxl')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    writer.close() # antes era writer.save() pero daba error 
+    processed_data = output.getvalue()
+    return processed_data
+
+
+
 def app():
     st.header("CARGA DE DATO")
     st.subheader("Agregar archivo Excel con la base de datos") 
     st.write("\n")
-    st.info("Los campos deben ser: FECHA, FACTURA, CLIENTE_CODIGO, CLIENTE_NOMBRE, SUCURSAL,SKU, UNIDADES, MONTO")
+    st.info("Las columnas deben ser exactamente las siguintes: FECHA, FACTURA, CLIENTE_CODIGO, CLIENTE_NOMBRE, SUCURSAL, SKU, UNIDADES, MONTO")
+    st.info("Los campos numericos no deben tener formato, debe ser formato = General")
+    st.info("Los campos: SUCURSAL,SKU y UNIDADES son opcionales")
+    st.info("No se permite valores nulos en ningun campo")
+
+    st.info("Descargar Plantilla de Excel de ejemplo")
+    plantilla = pd.read_csv('data/plantilla.csv')
+    plantilla_excel = to_excel(plantilla)
+    st.download_button(label='📥 Descargar Plantilla RFM',
+                    data=plantilla_excel ,
+                    file_name= 'PlantillaRFM.xlsx')
 
     # BOTON PARA SELECCIONAR EL ARCHIVO
     archivo = st.file_uploader("Seleccione el archivo", type = ['csv', 'xlsx'])
