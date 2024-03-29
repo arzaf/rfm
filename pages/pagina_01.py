@@ -47,7 +47,7 @@ def app():
         # Formatear el df
         data = data.convert_dtypes()
         #data['FECHA'] = pd.to_datetime(data['FECHA'],dayfirst=True)
-        data['FECHA'] = pd.to_datetime(data['FECHA'], errors='coerce', format='%Y-%d-%m')
+        data['FECHA'] = pd.to_datetime(data['FECHA'], errors='coerce', format='%Y-%m-%d')
         st.header("EJECUTAR RFM + OUTLIERS")
         # PARAMETROS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
         st.header('P A R A M E T R O S')
@@ -55,11 +55,18 @@ def app():
         st.write('Umbral para los Outliers: ','{:.0%}'.format(umbral_maximo))
         NOW = data['FECHA'].max() + timedelta(days=1)
         end_date = data['FECHA'].max()
+        #st.write(end_date)
+        
         start_date = data['FECHA'].min()
+        #st.write(start_date)
+        
         period = abs((end_date - start_date).days)
+        #st.write(period)
+        
         st.write('Facturas desde {} a {}'.format(data['FECHA'].min(),data['FECHA'].max()))
         st.write('Total dias en el perido analizado: ',period)
         data['DaysSinceOrder'] = data['FECHA'].apply(lambda x: (NOW - x).days)
+        st.write("Nota: Formato de Fecha = Año-Mes-Dia")
         # PARAMETRO SI GRAFICA
         graficar = st.radio('Con Graficos?', ['Si', 'No'],index=1,)
         

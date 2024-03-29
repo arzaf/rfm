@@ -29,12 +29,13 @@ def app():
     st.header("CARGA DE DATO")
     st.subheader("Agregar archivo Excel con la base de datos") 
     st.write("\n")
-    st.info("Las columnas deben ser exactamente las siguintes: FECHA, FACTURA, CLIENTE_CODIGO, CLIENTE_NOMBRE, SUCURSAL, SKU, UNIDADES, MONTO")
-    st.info("Los campos numericos no deben tener formato, debe ser formato = General")
-    st.info("Los campos: SUCURSAL,SKU y UNIDADES son opcionales")
-    st.info("No se permite valores nulos en ningun campo")
+    with st.expander("Información acerca del formato del archivo"):
+        st.info("Las columnas deben ser exactamente las siguintes: FECHA, FACTURA, CLIENTE_CODIGO, CLIENTE_NOMBRE, SUCURSAL, SKU, UNIDADES, MONTO")
+        st.info("Los campos numericos no deben tener formato, debe ser formato = General")
+        st.info("Los campos: SUCURSAL,SKU y UNIDADES son opcionales")
+        st.info("No se permite valores nulos en ningun campo")
 
-    st.info("Descargar Plantilla de Excel de ejemplo")
+    #st.info("Descargar Plantilla de Excel de ejemplo")
     plantilla = pd.read_csv('data/plantilla.csv')
     plantilla_excel = to_excel(plantilla)
     st.download_button(label='📥 Descargar Plantilla RFM',
