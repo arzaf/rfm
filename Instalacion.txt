@@ -15,11 +15,6 @@ conda install -c conda-forge pyxlsb
 pip install XlsxWriter
 Pip install openpyxl
 
-Mayor información:
-https://guillaume-martin.github.io/rfm-segmentation-with-python.html
-https://medium.com/@nurlan.imanov/CLIENTE_NOMBRE-segmentation-using-rfm-analysis-d2df1dfa2f9f
-https://futurice.com/blog/know-your-CLIENTE_NOMBREs-with-rfm
-https://clevertap.com/blog/rfm-analysis/
-https://plotly.com/python/sunburst-charts/
+
 
 '''
